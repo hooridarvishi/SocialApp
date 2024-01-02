@@ -1,0 +1,63 @@
+<form method="get">
+{% csrf_token %}
+    <input type="text" name="query" required>
+    <input type="submit" value="جست و جو" required>
+</form>
+{% if query %}
+results for {{ query }}
+    <br>
+{% endif %}
+{% for res in results %}
+    {{ res.description }}
+    {{ res.title }}
+{% empty %}
+    yaft nashod
+{% endfor %}
+<hr><br>
+{% if tag %}
+    <h2>
+    posts tagged with {{ tag.name }}
+    </h2>
+{% endif %}
+<div id="post-list">
+{% for post in posts %}
+    <a href="{{ post.get_absolute_url  }}">
+    {{ post.description|truncatewords:20|linebreaks }}
+    </a>
+    <br>
+    published at {{ post.created }} by {{ post.author }}
+    <br>
+
+{#    {{ post.tags.all }}#}
+{#    {{ post.tags.all|join:", " }}#}
+    {% for tag in post.tags.all %}
+        <a href="{% url 'social:post_list_by_tag' tag.slug %}">
+{{ tag.name }}
+        </a>
+        {% if not forloop.last %}،
+        {% endif %}
+     {% endfor %}
+{% endfor %}
+</div>
+{#<button id="load-more">#}
+{#    load more#}
+{#</button>#}
+{% include 'partials/pagination.html' with page=posts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function(){
+        var page=2;
+        $("#load-more").click(function(){
+            $.ajax({
+                typ: 'GET',
+
+                url:'{% if tag %} {% url 'social:post_list_by_tag' tag.slug %} {% else %}{% url 'social:post_list' %} {% endif %}'+"?page="+page ,
+                datatype:"html",
+                success:function (data){
+                    $("#post-list").append(data);
+                    page +=1 ;
+                }
+            });
+        });
+    });
+</script>

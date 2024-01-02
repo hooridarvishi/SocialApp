@@ -1,0 +1,91 @@
+{% load thumbnail %}
+{% load static %}
+<p>
+    {{ user.get_full_name }}
+</p>
+
+<div>
+    <a href="{% url 'social:user_contact' user.username 'followers' %}">
+{{ user.followers.count }}followers
+    </a>
+</div>
+
+    <a href="{% url 'social:user_contact' user.username 'followings' %}">
+{{ user.followings.count }} followings
+    </a>
+</div>
+<br>
+    {% if request.user == user %}
+{#       <button disabled>#}
+{#            {% if reqest.user in user.followers.all %}#}
+{#                unfollow#}
+{#            {% else %}#}
+{#                follow#}
+{#            {% endif %}#}
+{#        btn#}
+{#        </button>#}
+        your page
+    {% else %}
+             <button class="follow-button" >
+            {% if reqest.user in user.followers.all %}
+                unfollow
+            {% else %}
+                follow
+            {% endif %}
+        </button>
+    {% endif %}
+    {% if user.photo %}
+        <a href="{{ user.photo.url }}">
+            <img src="{% thumbnail user.photo 50x50 quality=80 %}">
+{#        0 یعنی همون اندازه ای ک داره#}
+        </a>
+    {% else %}
+        <img src="{% static 'images/Profile-PNG-Free-Download.png' %}" style="width: 200px">
+    {% endif %}
+    <p>
+  bio:  {{ user.bio }}
+    </p>
+    <p>
+  job: {{ user.job }}
+    </p>
+    <p>
+  date_of_birth :  {{ user.date_of_birth|default:"___" }}
+    </p>
+{% with total_followers=user.followers.count total_followings=user.following.count %}
+    <span class="followers-count">
+    {{ total_followers }} follower {{ total_followers|pluralize }}
+    </span>
+    <span class="followings-count">
+    {{ total_followings }} followings {{ total_followings|pluralize }}
+    </span>
+
+
+{% endwith %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function () {
+            $(".follow-button").click(function (){
+            {#var user_id=$(this).closest('.post').data('post-id');#}
+            var button=$(this);
+
+            var csrfToken='{{ csrf_token }}';
+            $.ajax({
+                type:'POST',
+                url:"{% url 'social:user_follow' %}",
+                data:{'id':'{{ user.id }}', 'csrfmiddlewaretoken':'{{ csrf_token }}'},
+                success:function (data){
+                    if (data.follow){
+                        button.text("unfollow");
+
+                    } else {
+                        button.text("follow");
+                    }
+                    {#اطلاعات از جیسون به ویو میره#}
+                    $(".followers-count").text(data.followers_count + 'follower {{ total_followers|pluralize }}');
+                    $(".followings-count").text(data.followings_count + 'following {{ total_followings|pluralize }}');
+                },
+            });
+        });
+       })
+</script>

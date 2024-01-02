@@ -1,0 +1,12 @@
+{% if comment %}
+    کامنت شما ثبت شد
+    <a href="{% url 'social:post_list' %}">
+    لیست پست ها
+    </a>
+{% else %}
+ <form method="post">
+ {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="افزودن کامنت">
+ </form>
+{% endif %}

@@ -1,0 +1,72 @@
+{% load thumbnail %}
+{% load static %}
+<a href="{% url 'social:create_posts' %}">
+    create post
+</a>
+{% with user=request.user %}
+
+<p>
+    {{ request.user.get_ful_name }}
+</p>
+    {% if user.photo %}
+        <a href="{{ user.photo.url }}">
+            <img src="{% thumbnail user.photo 200x0 quality=80 %}">
+{#        0 یعنی همون اندازه ای ک داره#}
+        </a>
+    {% else %}
+        <img src="{% static 'images/Profile-PNG-Free-Download.png' %}" style="width: 200px">
+    {% endif %}
+
+{% endwith %}
+<h2>
+    پست های شما توسط شما سیو شد
+</h2>
+<ul>
+    {% for post in saved_posts %}
+        <a href="{{ post.get_absolute_url }}">
+            {{ post.description|truncatewords:20|linebreaks }}
+        </a>
+        published at {{ post.created }} by {{ post.author }}
+        <br><br><hr>
+    {% endfor %}
+</ul>
+<table>
+<tr>
+    <th>
+        ردیف
+    </th>
+    <th>
+       مشاهده
+    </th>
+
+    <th>
+حذف
+    </th>
+    <th>
+        ویرایش
+    </th>
+</tr>
+{#<br>#}
+    {% for post in posts %}
+        <tr>
+        <td>
+        {{ forloop.counter }}
+        </td>
+        <td>
+        <a href="{% url 'social:post_detail'  post.id%}">
+{{ post.title }}
+        </a>
+        </td>
+        <td>
+        <a href="{% url 'social:delete_posts' post.id  %}">
+            delete post
+        </a>
+        </td>
+        <td>
+        <a href="{% url 'social:edit_posts'  post.id%}">
+edit
+        </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
